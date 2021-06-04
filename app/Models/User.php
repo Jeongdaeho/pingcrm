@@ -19,14 +19,19 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function organizations()
+    {
+        return $this->hasMany(Organization::class);
+    }
+
+    public function contacts()
+    {
+        return $this->hasMany(Contact::class);
+    }
+
     public function resolveRouteBinding($value, $field = null)
     {
         return $this->where($field ?? 'id', $value)->withTrashed()->firstOrFail();
-    }
-
-    public function account()
-    {
-        return $this->belongsTo(Account::class);
     }
 
     public function getNameAttribute()
@@ -42,11 +47,6 @@ class User extends Authenticatable
     public function isDemoUser()
     {
         return $this->email === 'johndoe@example.com';
-    }
-
-    public function scopeOrderByName($query)
-    {
-        $query->orderBy('last_name')->orderBy('first_name');
     }
 
     public function scopeWhereRole($query, $role)
