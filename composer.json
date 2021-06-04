@@ -16,9 +16,11 @@
         "laravel/framework": "^8.40",
         "laravel/tinker": "^2.5",
         "league/glide-laravel": "^1.0",
+        "spatie/laravel-permission": "^4.1",
         "tightenco/ziggy": "^0.8.0"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.6",
         "facade/ignition": "^2.5",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.2",

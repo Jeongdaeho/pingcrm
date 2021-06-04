@@ -140,3 +140,8 @@ Route::get('reports', [ReportsController::class, 'index'])
 Route::get('/img/{path}', [ImagesController::class, 'show'])
     ->where('path', '.*')
     ->name('image');
+
+
+Route::get('/test', function (){
+    return view('test');
+});

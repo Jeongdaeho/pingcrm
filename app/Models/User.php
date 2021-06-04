@@ -15,7 +15,6 @@ class User extends Authenticatable
     use SoftDeletes;
 
     protected $casts = [
-        'owner' => 'boolean',
         'email_verified_at' => 'datetime',
     ];
 
@@ -42,11 +41,6 @@ class User extends Authenticatable
     public function setPasswordAttribute($password)
     {
         $this->attributes['password'] = Hash::needsRehash($password) ? Hash::make($password) : $password;
-    }
-
-    public function isDemoUser()
-    {
-        return $this->email === 'johndoe@example.com';
     }
 
     public function scopeWhereRole($query, $role)
