@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 use App\Models\User;
-// use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -17,9 +17,9 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        // if( $rootRole = Role::where('name', 'root')->first() ) {
-        //     return;
-        // }
+        if( $rootRole = Role::where('name', 'root')->first() ) {
+            return;
+        }
 
         if ( !$user = User::where('email', 'root@root.com')->first() ) {
             $user = User::create([
@@ -30,6 +30,6 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        // $user->assignRole('root');
+        $user->assignRole('root');
     }
 }
