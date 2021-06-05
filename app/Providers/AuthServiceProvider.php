@@ -25,6 +25,9 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        // 슈퍼 어드민은 권한 할당 하지 않아도 권한을 가진다.
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('root') ? true : null;
+        });
     }
 }

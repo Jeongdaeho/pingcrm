@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Database\Schema\Blueprint;
 
 class UsersController extends Controller
 {
@@ -17,40 +20,58 @@ class UsersController extends Controller
     {
         return Inertia::render('Users/Index', [
             'filters' => Request::all('search', 'role', 'trashed'),
+            'roles' => $this->roleList(),
             'users' => User::orderBy('id', 'desc')
+                ->with('roles', function($query){
+                    $query->select('id', 'name');
+                })
                 ->filter(Request::only('search', 'role', 'trashed'))
-                ->get()
-                ->transform(fn ($user) => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'owner' => $user->owner,
-                    'photo' => $user->photo_path ? URL::route('image', ['path' => $user->photo_path, 'w' => 40, 'h' => 40, 'fit' => 'crop']) : null,
-                    'deleted_at' => $user->deleted_at,
-                ]),
+                ->paginate(20)
+                ->withQueryString()
+                ->through( function ($user) {
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'roles' => $user->roles->map(function ($role){
+                            return $role->name;
+                        }),
+                        'created_at' => $user->created_at->toDateString(),
+                        'email' => $user->email,
+                        'deleted_at' => $user->deleted_at,
+                    ];
+                }),
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('Users/Create');
+        return Inertia::render('Users/Create', [
+            'roles' => $this->roleList(),
+        ]);
     }
 
     public function store()
     {
-        Request::validate([
-            'name' => ['required', 'max:50'],
+        $input = Request::validate([
+            'name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'max:50', 'email', Rule::unique('users')],
-            'password' => ['nullable'],
+            'password' => ['required', 'string', 'min:8'],
+            'roles' => ['nullable'],
         ]);
 
-        User::create([
-            'name' => Request::get('name'),
-            'email' => Request::get('email'),
-            'password' => Request::get('password'),
-        ]);
+        DB::transaction(function () use ($input) {
+            $user = User::create([
+                'name' => $input['name'],
+                'email' => $input['email'],
+                'password' => $input['password'],
+            ]);
 
-        return Redirect::route('users')->with('success', 'User created.');
+            if( $this->roleList()->pluck('name')->contains( $input['roles']) )
+            {
+                $user->assignRole($input['roles']);
+            }
+        }, 1);
+        return Redirect::route('users.index')->with('success', 'User created.');
     }
 
     public function edit(User $user)
@@ -60,8 +81,6 @@ class UsersController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'owner' => $user->owner,
-                'photo' => $user->photo_path ? URL::route('image', ['path' => $user->photo_path, 'w' => 60, 'h' => 60, 'fit' => 'crop']) : null,
                 'deleted_at' => $user->deleted_at,
             ],
         ]);
@@ -77,8 +96,6 @@ class UsersController extends Controller
             'name' => ['required', 'max:50'],
             'email' => ['required', 'max:50', 'email', Rule::unique('users')->ignore($user->id)],
             'password' => ['nullable'],
-            'owner' => ['required', 'boolean'],
-            'photo' => ['nullable', 'image'],
         ]);
 
         $user->update(Request::only('name', 'email'));
@@ -106,5 +123,16 @@ class UsersController extends Controller
         $user->restore();
 
         return Redirect::back()->with('success', 'User restored.');
+    }
+
+    //root 를 제외한 role 목록.
+    public function roleList()
+    {
+        $roles = Role::select('id', 'name');
+        if ( !Gate::allows('super admin') ) {
+            Role::select('name')->where('name', '!=', 'root')->get();
+        }
+
+        return $roles->get();
     }
 }

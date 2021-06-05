@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
@@ -20,24 +21,21 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function organizations()
-    {
-        return $this->hasMany(Organization::class);
-    }
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
 
-    public function contacts()
-    {
-        return $this->hasMany(Contact::class);
-    }
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'email_verified_at',
+    ];
 
     public function resolveRouteBinding($value, $field = null)
     {
         return $this->where($field ?? 'id', $value)->withTrashed()->firstOrFail();
-    }
-
-    public function getNameAttribute()
-    {
-        return $this->first_name.' '.$this->last_name;
     }
 
     public function setPasswordAttribute($password)
@@ -45,24 +43,15 @@ class User extends Authenticatable
         $this->attributes['password'] = Hash::needsRehash($password) ? Hash::make($password) : $password;
     }
 
-    public function scopeWhereRole($query, $role)
-    {
-        switch ($role) {
-            case 'user': return $query->where('owner', false);
-            case 'owner': return $query->where('owner', true);
-        }
-    }
-
     public function scopeFilter($query, array $filters)
     {
         $query->when($filters['search'] ?? null, function ($query, $search) {
             $query->where(function ($query) use ($search) {
-                $query->where('first_name', 'like', '%'.$search.'%')
-                    ->orWhere('last_name', 'like', '%'.$search.'%')
+                $query->where('name', 'like', '%'.$search.'%')
                     ->orWhere('email', 'like', '%'.$search.'%');
             });
         })->when($filters['role'] ?? null, function ($query, $role) {
-            $query->whereRole($role);
+            $query->whereIn('id', Role::find($role)->users()->get()->pluck('id') );
         })->when($filters['trashed'] ?? null, function ($query, $trashed) {
             if ($trashed === 'with') {
                 $query->withTrashed();
