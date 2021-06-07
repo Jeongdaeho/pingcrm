@@ -38,7 +38,7 @@ export default {
   layout: Layout,
   remember: 'form',
   props: {
-    roles: Array,
+    role: Array,
   },
   data() {
     return {
@@ -46,7 +46,7 @@ export default {
         name: null,
         email: null,
         password: null,
-        roles: this.roles,
+        role: this.role,
       }),
     }
   },

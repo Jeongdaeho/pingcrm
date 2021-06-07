@@ -17,6 +17,9 @@
           <text-input v-model="form.name" :error="form.errors.name" class="pr-6 pb-8 w-full lg:w-1/2" label="Name" />
           <text-input v-model="form.email" :error="form.errors.email" class="pr-6 pb-8 w-full lg:w-1/2" label="Email" />
           <text-input v-model="form.password" :error="form.errors.password" class="pr-6 pb-8 w-full lg:w-1/2" type="password" autocomplete="new-password" label="Password" />
+          <select-input v-model="form.role" :error="form.errors.roles" class="pr-6 pb-8 w-full lg:w-1/2" label="Roles">
+            <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
+          </select-input>
         </div>
         <div class="px-8 py-4 bg-gray-50 border-t border-gray-100 flex items-center">
           <button v-if="!user.deleted_at" class="text-red-600 hover:underline" tabindex="-1" type="button" @click="destroy">Delete User</button>
@@ -32,6 +35,7 @@ import Layout from '@/Shared/Layout'
 import TextInput from '@/Shared/TextInput'
 import LoadingButton from '@/Shared/LoadingButton'
 import TrashedMessage from '@/Shared/TrashedMessage'
+import SelectInput from '@/Shared/SelectInput'
 
 export default {
   metaInfo() {
@@ -43,10 +47,12 @@ export default {
     LoadingButton,
     TextInput,
     TrashedMessage,
+    SelectInput,
   },
   layout: Layout,
   props: {
     user: Object,
+    roles: Array,
   },
   remember: 'form',
   data() {
@@ -56,6 +62,7 @@ export default {
         name: this.user.name,
         email: this.user.email,
         password: null,
+        role: this.user.role,
       }),
     }
   },
@@ -65,12 +72,12 @@ export default {
       })
     },
     destroy() {
-      if (confirm('Are you sure you want to delete this user?')) {
+      if (confirm('정말 삭제 하시겠습니까?')) {
         this.$inertia.delete(this.route('users.destroy', this.user.id))
       }
     },
     restore() {
-      if (confirm('Are you sure you want to restore this user?')) {
+      if (confirm('복구 하시겠습니까?')) {
         this.$inertia.put(this.route('users.restore', this.user.id))
       }
     },

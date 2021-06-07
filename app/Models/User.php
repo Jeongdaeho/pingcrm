@@ -51,7 +51,7 @@ class User extends Authenticatable
                     ->orWhere('email', 'like', '%'.$search.'%');
             });
         })->when($filters['role'] ?? null, function ($query, $role) {
-            $query->whereIn('id', Role::find($role)->users()->get()->pluck('id') );
+            $query->role($role);
         })->when($filters['trashed'] ?? null, function ($query, $trashed) {
             if ($trashed === 'with') {
                 $query->withTrashed();
