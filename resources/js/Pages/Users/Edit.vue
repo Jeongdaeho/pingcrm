@@ -4,7 +4,7 @@
       <h1 class="font-bold text-3xl">
         <inertia-link class="text-indigo-400 hover:text-indigo-600" :href="route('users.index')">Users</inertia-link>
         <span class="text-indigo-400 font-medium">/</span>
-        {{ form.first_name }} {{ form.last_name }}
+        {{ form.name }}
       </h1>
       <img v-if="user.photo" class="block w-8 h-8 rounded-full ml-4" :src="user.photo" />
     </div>
@@ -17,7 +17,7 @@
           <text-input v-model="form.name" :error="form.errors.name" class="pr-6 pb-8 w-full lg:w-1/2" label="Name" />
           <text-input v-model="form.email" :error="form.errors.email" class="pr-6 pb-8 w-full lg:w-1/2" label="Email" />
           <text-input v-model="form.password" :error="form.errors.password" class="pr-6 pb-8 w-full lg:w-1/2" type="password" autocomplete="new-password" label="Password" />
-          <select-input v-model="form.role" :error="form.errors.roles" class="pr-6 pb-8 w-full lg:w-1/2" label="Roles">
+          <select-input v-model="form.role" :error="form.errors.role" class="pr-6 pb-8 w-full lg:w-1/2" label="Role">
             <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
           </select-input>
         </div>

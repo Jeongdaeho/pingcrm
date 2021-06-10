@@ -3,35 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Redirect;
 
 class UsersController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         return Inertia::render('Users/Index', [
-            'filters' => Request::all('search', 'role', 'trashed'),
+            'filters' => $request->all('search', 'role', 'trashed'),
             'roles' => $this->roleList(),
             'users' => User::orderBy('id', 'desc')
                 ->with('roles', function($query){
                     $query->select('id', 'name');
                 })
-                ->filter(Request::only('search', 'role', 'trashed'))
+                ->filter($request->only('search', 'role', 'trashed'))
                 ->paginate(20)
                 ->withQueryString()
                 ->through( function ($user) {
                     return [
                         'id' => $user->id,
                         'name' => $user->name,
-                        'roles' => $user->roles->map(function ($role){
-                            return $role->name;
-                        }),
+                        'roles' => $user->roles,
                         'created_at' => $user->created_at->toDateString(),
                         'email' => $user->email,
                         'deleted_at' => $user->deleted_at,
@@ -47,11 +45,11 @@ class UsersController extends Controller
         ]);
     }
 
-    public function store()
+    public function store(Request $request)
     {
         // $user->roles()->sync($request->input('roles.*.id', []));
 
-        $input = Request::validate([
+        $input = $request->validate([
             'name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'max:50', 'email', Rule::unique('users')],
             'password' => ['required', 'string', 'min:8'],
@@ -79,30 +77,29 @@ class UsersController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'deleted_at' => $user->deleted_at,
-                'role' => $user->roles[0]['id'],
-                // 'roles' => $user->roles,     기본적으로 복수형이지만 임시로 단수형으로, 시간날때 변경!!
+                'role' => $user->roles->get(0)->id?? '',
             ],
 
         ]);
     }
 
-    public function update(User $user)
+    public function update(User $user, Request $request)
     {
-        Request::validate([
+        $request->validate([
             'name' => ['required', 'max:50'],
             'email' => ['required', 'max:50', 'email', Rule::unique('users')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8'],
             'role' => ['nullable',  Rule::in($this->roleList()->pluck('id'))],
         ]);
 
-        DB::transaction(function () use ($user) {
-            $user->update(Request::only('name', 'email'));
-            if (Request::get('password')) {
-                $user->update(['password' => Request::get('password')]);
+        DB::transaction(function () use ($user, $request) {
+            $user->update($request->only('name', 'email'));
+            if ($request->get('password')) {
+                $user->update(['password' => $request->get('password')]);
             }
 
-            if (Request::get('role')) {
-                $user->syncRoles(Request::get('role'));
+            if ($request->get('role')) {
+                $user->syncRoles($request->get('role'));
             }
         });
 

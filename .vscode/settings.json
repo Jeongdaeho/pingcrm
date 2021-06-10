@@ -1,0 +1,71 @@
+{
+    "editor.suggestSelection": "first",
+    "workbench.iconTheme": "vscode-icons",
+    "workbench.tree.indent": 20,
+    "workbench.activityBar.visible": true,
+    "vsicons.dontShowNewVersionMessage": true,
+    "editor.wordWrap": "on",
+    "search.useIgnoreFiles": false,
+    "terminal.integrated.fontFamily": "Meslo LG M DZ for Powerline, monospace",
+    "workbench.colorCustomizations": {
+        "editor.wordHighlightBackground": "#0066ff2a",
+        "editor.wordHighlightStrongBackground": "#0066ff69",
+        "editor.selectionBackground": "#8f8d3e82", //Current SELECTED text
+        "editor.selectionHighlightBackground": "#4a558f", //same content as the selection
+        "editor.findMatchBackground": "#00cc44a8", //Current SEARCH MATCH
+        "editor.findMatchHighlightBackground": "#ff7b00a1", //Other S
+        "editor.lineHighlightBackground": "#666666a1",
+        "list.activeSelectionBackground": "#a77777a1",
+        "list.focusBackground": "#77b777a1",
+        "list.hoverBackground":"#77b777a1",
+        "list.inactiveSelectionBackground":"#afb20271",
+        "list.deemphasizedForeground": "#ff0000",
+        "quickInputList.focusBackground": "#8c1fb8bc",
+        "pickerGroup.foreground": "#c4c5bb"
+    },
+    "css.enabledLanguages": [
+        "php", "vue",
+        "html"
+    ],
+    "editor.lineNumbers": "on",
+    "terminal.integrated.fontSize": 16,
+    "terminal.integrated.rendererType": "dom",
+    "html-css-class-completion.enableEmmetSupport": true,
+    "blade.format.enable": true,
+    "artisan.maxBuffer": 2048000,
+    "emmet.showSuggestionsAsSnippets": true,
+    "emmet.syntaxProfiles": {
+        "vue-html": "html",
+        "vue": "html"
+    },
+    "liveServer.settings.donotShowInfoMsg": true,
+    "oneDarkPro.editorTheme": "oneDarkProFlat",
+    "workbench.preferredDarkColorTheme": "Solarized Dark",
+    "json.maxItemsComputed": 10000,
+    "css.validate": false,
+    "editor.quickSuggestions": true,
+    "tailwindCSS.includeLanguages": {
+        "plaintext": "html"
+    },
+    "editor.fontSize": 14,
+    "[vue]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.detectIndentation": false
+    },
+    "[html]": {
+      "editor.insertSpaces": true,
+      "editor.tabSize": 2,
+      "editor.detectIndentation": false
+    },
+    "[js]": {
+      "editor.insertSpaces": true,
+      "editor.tabSize": 2,
+      "editor.detectIndentation": false
+    },
+    "[yaml]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": "advanced"
+    }
+}
